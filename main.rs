@@ -11,14 +11,17 @@ enum NotAnOperationError {
 
 fn eval_calc(vec: Vec<&str>) -> Result<f64, NotAnOperationError> {
 
-    if vec.get(0).unwrap().parse::<f64>().is_err() || vec.get(2).unwrap().parse::<f64>().is_err() {
+    let val1 = vec.get(0).unwrap().parse::<f64>();
+    let val2 = vec.get(2).unwrap().parse::<f64>();
+
+    if val1.is_err() || val2.is_err() {
 
         return Err(NotAnOperationError::InvalidValue)
 
     }
 
-    let val1 = vec.get(0).unwrap().parse::<f64>().unwrap();
-    let val2 = vec.get(2).unwrap().parse::<f64>().unwrap();
+    let val1 = val1.unwrap();
+    let val2 = val2.unwrap();
 
     match *vec.get(1).unwrap() {
 
@@ -56,11 +59,20 @@ fn main() -> Result<(), Box<dyn error::Error>> {
 
     }
 
-    let calc_result = eval_calc(input_vec.clone());
+    if input_vec.len() == 3 {
 
-    if input_vec.len() == 3 && calc_result.is_ok() {
+        let calc_result = eval_calc(input_vec.clone());
 
-        println!("{}", calc_result.unwrap());
+        if calc_result.is_ok() {
+
+            println!("{}", calc_result.unwrap());
+
+        }
+        else {
+
+            println!("Provide a valid input.");
+
+        }
 
     }
     else {
