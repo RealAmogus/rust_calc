@@ -11,12 +11,7 @@ enum NotAnOperationError {
 
 fn eval_calc(vec: Vec<&str>) -> Result<f64, NotAnOperationError> {
 
-    if let Err(_e) = vec.get(0).unwrap().parse::<f64>() {
-
-        return Err(NotAnOperationError::InvalidValue)
-
-    }
-    else if let Err(_e) = vec.get(2).unwrap().parse::<f64>() {
+    if vec.get(0).unwrap().parse::<f64>().is_err() || vec.get(2).unwrap().parse::<f64>().is_err() {
 
         return Err(NotAnOperationError::InvalidValue)
 
