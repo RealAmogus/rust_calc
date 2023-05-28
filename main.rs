@@ -1,16 +1,24 @@
 use std::{error, io};
 use std::thread::park;
 
-fn eval_calc(vec: Vec<&str>) -> f64 {
+#[derive(Debug)]
+enum NotAnOperationError {
+
+    InvalidSign,
+    InvalidValue
+
+}
+
+fn eval_calc(vec: Vec<&str>) -> Result<f64, NotAnOperationError> {
 
     if let Err(_e) = vec.get(0).unwrap().parse::<f64>() {
 
-        return 0.0
+        return Err(NotAnOperationError::InvalidValue)
 
     }
     else if let Err(_e) = vec.get(2).unwrap().parse::<f64>() {
 
-        return 0.0
+        return Err(NotAnOperationError::InvalidValue)
 
     }
 
@@ -19,13 +27,13 @@ fn eval_calc(vec: Vec<&str>) -> f64 {
 
     match *vec.get(1).unwrap() {
 
-        "+" => val1 + val2,
-        "-" => val1 - val2,
-        "*" => val1 * val2,
-        "/" => val1 / val2,
-        "log" => val2.log(val1),
-        "^" => val1.powf(val2),
-        &_ => 0.0
+        "+" => Ok(val1 + val2),
+        "-" => Ok(val1 - val2),
+        "*" => Ok(val1 * val2),
+        "/" => Ok(val1 / val2),
+        "log" => Ok(val2.log(val1)),
+        "^" => Ok(val1.powf(val2)),
+        &_ => Err(NotAnOperationError::InvalidSign)
 
     }
 
@@ -55,9 +63,9 @@ fn main() -> Result<(), Box<dyn error::Error>> {
 
     let calc_result = eval_calc(input_vec.clone());
 
-    if input_vec.len() == 3 && calc_result != 0.0 {
+    if input_vec.len() == 3 && calc_result.is_ok() {
 
-        println!("{}", calc_result);
+        println!("{}", calc_result.unwrap());
 
     }
     else {
