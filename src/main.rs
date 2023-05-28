@@ -1,87 +1,73 @@
-use std::{error, io};
-use std::thread::park;
+use std::error::Error;
+use std::fmt::{Debug, Display, Error as fmtError, Formatter};
+use std::io;
 
-#[derive(Debug)]
 enum NotAnOperationError {
-
     InvalidSign,
-    InvalidValue
-
+    InvalidValue,
 }
 
-fn eval_calc(vec: Vec<&str>) -> Result<f64, NotAnOperationError> {
-
-    let val1 = vec.get(0).unwrap().parse::<f64>();
-    let val2 = vec.get(2).unwrap().parse::<f64>();
-
-    if val1.is_err() || val2.is_err() {
-
-        return Err(NotAnOperationError::InvalidValue)
-
+impl Debug for NotAnOperationError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), fmtError> {
+        match self {
+            NotAnOperationError::InvalidSign => write!(f, "Couldn't recognize the operation."),
+            NotAnOperationError::InvalidValue => write!(f, "Couldn't parse the input to f64."),
+        }
     }
+}
 
-    let val1 = val1.unwrap();
-    let val2 = val2.unwrap();
+impl Display for NotAnOperationError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), fmtError> {
+        match self {
+            NotAnOperationError::InvalidSign => write!(f, "Couldn't recognize the operation."),
+            NotAnOperationError::InvalidValue => write!(f, "Couldn't parse the input to f64."),
+        }
+    }
+}
 
-    match *vec.get(1).unwrap() {
+impl Error for NotAnOperationError {}
 
+fn eval_calc(vec: Vec<&str>) -> Result<f64, NotAnOperationError> {
+    let val1 = vec[0].parse::<f64>();
+    let val2 = vec[2].parse::<f64>();
+
+    let Some((val1, val2)) = val1.ok().zip(val2.ok())
+        else {
+        return Err(NotAnOperationError::InvalidValue);
+    };
+
+    match vec[1] {
         "+" => Ok(val1 + val2),
         "-" => Ok(val1 - val2),
         "*" => Ok(val1 * val2),
         "/" => Ok(val1 / val2),
         "log" => Ok(val2.log(val1)),
         "^" => Ok(val1.powf(val2)),
-        &_ => Err(NotAnOperationError::InvalidSign)
-
+        &_ => Err(NotAnOperationError::InvalidSign),
     }
-
 }
 
-fn main() -> Result<(), Box<dyn error::Error>> {
-
-    println!("Supported operations:
+fn main() -> Result<(), Box<dyn Error>> {
+    println!(
+        "Supported operations:
     value + value
     value - value
     value * value
     value / value
     base log exponent
-    base ^ power");
+    base ^ power"
+    );
 
     let mut user_input = String::new();
     io::stdin().read_line(&mut user_input)?;
-    let input_iter = user_input.split_whitespace();
 
-    let mut input_vec: Vec<&str> = Vec::new();
-
-    for str in input_iter {
-
-        input_vec.push(str);
-
-    }
+    let input_vec: Vec<&str> = user_input.split_whitespace().collect();
 
     if input_vec.len() == 3 {
-
-        let calc_result = eval_calc(input_vec.clone());
-
-        if calc_result.is_ok() {
-
-            println!("{}", calc_result.unwrap());
-
-        }
-        else {
-
-            println!("Provide a valid input.");
-
-        }
-
-    }
-    else {
-
+        println!("{}", eval_calc(input_vec)?);
+    } else {
         println!("Provide a valid input.");
-
     }
 
-    park();
     Ok(())
-
 }
