@@ -53,9 +53,11 @@ fn main() -> Result<(), Box<dyn error::Error>> {
 
     }
 
-    if input_vec.len() == 3 && eval_calc(input_vec.clone()) != 0.0 {
+    let calc_result = eval_calc(input_vec.clone());
 
-        println!("{}", eval_calc(input_vec));
+    if input_vec.len() == 3 && calc_result != 0.0 {
+
+        println!("{}", calc_result);
 
     }
     else {
